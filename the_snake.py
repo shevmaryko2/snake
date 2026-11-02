@@ -1,4 +1,5 @@
 """Игра Змейка."""
+import random
 import sys
 
 import pygame
@@ -64,14 +65,8 @@ class Apple(GameObject):
     def randomize_position(self):
         """Устанавливает случайное положение яблока на игровом поле."""
         self.position = (
-            pygame.math.Vector2(
-                (SCREEN_WIDTH // 2) // GRID_SIZE,
-                (SCREEN_HEIGHT // 2) // GRID_SIZE,
-            ) * GRID_SIZE
-        )
-        self.position = (
-            __import__('random').randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            __import__('random').randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
+            random.randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            random.randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
         )
 
     def draw(self):
