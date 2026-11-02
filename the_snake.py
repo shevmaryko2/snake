@@ -1,5 +1,5 @@
+"""Игра Змейка."""
 import sys
-from random import randint
 
 import pygame
 
@@ -64,8 +64,14 @@ class Apple(GameObject):
     def randomize_position(self):
         """Устанавливает случайное положение яблока на игровом поле."""
         self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
+            pygame.math.Vector2(
+                (SCREEN_WIDTH // 2) // GRID_SIZE,
+                (SCREEN_HEIGHT // 2) // GRID_SIZE,
+            ) * GRID_SIZE
+        )
+        self.position = (
+            __import__('random').randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            __import__('random').randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
         )
 
     def draw(self):
@@ -101,17 +107,10 @@ class Snake(GameObject):
         """Обновляет позицию змейки."""
         head_x, head_y = self.get_head_position()
         dx, dy = self.direction
-        
-        # Вычисляем новую позицию головы с учетом телепортации через стены
         new_x = (head_x + dx * GRID_SIZE) % SCREEN_WIDTH
         new_y = (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT
-        
         new_head = (new_x, new_y)
-        
-        # Вставляем новую голову в начало списка
         self.positions.insert(0, new_head)
-        
-        # Если длина не увеличилась, удаляем последний сегмент
         if len(self.positions) > self.length:
             self.last = self.positions.pop()
         else:
@@ -123,13 +122,9 @@ class Snake(GameObject):
             rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(screen, self.body_color, rect)
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
-
-        # Отрисовка головы змейки
         head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
-
-        # Затирание последнего сегмента
         if self.last:
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
@@ -140,7 +135,7 @@ class Snake(GameObject):
 
 
 def handle_keys(game_object):
-    """Обрабатывает нажатия клавиш для изменения направления движения."""
+    """Обрабатывает нажатия клавиш для изменения направления."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -157,30 +152,21 @@ def handle_keys(game_object):
 
 
 def main():
-    """Основной цикл игры."""
+    """Запускает основной цикл игры."""
     pygame.init()
-    
     snake = Snake()
     apple = Apple()
-
     while True:
         clock.tick(SPEED)
-        
         handle_keys(snake)
         snake.update_direction()
         snake.move()
-
-        # Проверка на поедание яблока
         if snake.get_head_position() == apple.position:
             snake.length += 1
             apple.randomize_position()
-
-        # Проверка на столкновение с самим собой
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             screen.fill(BOARD_BACKGROUND_COLOR)
-
-        # Отрисовка
         snake.draw()
         apple.draw()
         pygame.display.update()
